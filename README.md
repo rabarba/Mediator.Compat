@@ -14,4 +14,3 @@ Early work-in-progress. Public API contracts first, then core mediator, then DI 
 
 ## License
 MIT © Ugur Kap
-EOF
