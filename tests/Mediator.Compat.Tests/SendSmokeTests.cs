@@ -17,8 +17,8 @@ public class SendSmokeTests
     {
         var services = new ServiceCollection();
 
-        services.AddSingleton<IMediator, MediatR.Mediator>();
-        services.AddTransient<IRequestHandler<Ping, int>, PingHandler>();
+        // ⬇️ This registers IMediator + RequestExecutorCache and scans this test assembly
+        services.AddMediatorCompat(typeof(SendSmokeTests).Assembly);
 
         var sp = services.BuildServiceProvider();
         var mediator = sp.GetRequiredService<IMediator>();
