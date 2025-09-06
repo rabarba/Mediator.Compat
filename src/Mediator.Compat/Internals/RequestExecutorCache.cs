@@ -18,31 +18,32 @@ internal sealed class RequestExecutorCache
     // One-time generic close; no reflection per call after this.
     private static BoxedExecutor BuildExecutor<TReq, TRes>() where TReq : IRequest<TRes>
     {
-        return async (sp, requestObj, ct) =>
+        return static async (sp, requestObj, ct) =>
         {
             var handler = sp.GetService<IRequestHandler<TReq, TRes>>();
             if (handler is null)
             {
-                // Keep your existing meaningful message pattern
                 throw new InvalidOperationException(
                     $"No IRequestHandler<{typeof(TReq).FullName}, {typeof(TRes).FullName}> is registered. " +
                     "Make sure the handler is registered with the DI container (AddMediatorCompat or manual registration).");
             }
 
             var req = (TReq)requestObj;
-            var behaviors = sp.GetServices<IPipelineBehavior<TReq, TRes>>();
 
-            RequestHandlerDelegate<TRes> next = () => handler.Handle(req, ct);
-
-            // registration order = execution order (first = outermost)
-            // DI returns in registration order → wrap in reverse
-            foreach (var b in behaviors.Reverse())
+            var behaviorsEnum = sp.GetServices<IPipelineBehavior<TReq, TRes>>();
+            IPipelineBehavior<TReq, TRes>[] behaviors;
+            if (behaviorsEnum is IPipelineBehavior<TReq, TRes>[] arr)
             {
-                var current = next;
-                next = () => b.Handle(req, current, ct);
+                behaviors = arr;
+            }
+            else
+            {
+                var list = new System.Collections.Generic.List<IPipelineBehavior<TReq, TRes>>(4);
+                list.AddRange(behaviorsEnum);
+                behaviors = list.ToArray();
             }
 
-            var result = await next().ConfigureAwait(false);
+            var result = await BehaviorChain.Invoke(behaviors, handler, req, ct).ConfigureAwait(false);
             return (object?)result;
         };
     }
