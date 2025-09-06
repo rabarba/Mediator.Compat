@@ -119,26 +119,10 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 
 ---
 
-## Target Framework & Tooling
-
-- .NET **8.0+**
-- Nullable enabled, analyzers on (recommended).
-- Works great with Rider / VS / VS Code.
-
----
-
 ## Roadmap
 
 - [ ] **Delegate caching** for `Send<T>` (avoid reflection per call)
 - [ ] **Pipeline caching** per closed `TReq/TRes`
-
----
-
-## Contributing
-
-- Keep public surface minimal (Abstractions) and well-documented (XML).
-- Add focused unit tests for behaviors, order, and errors.
-- Conventional commits are appreciated (`feat:`, `fix:`, `docs:` …).
 
 ---
 
