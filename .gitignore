@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Rider / IDE
+.idea/
+*.sln.iml
+
+# VSCode (opsiyonel)
+.vscode/
+
+# Build artifacts
+bin/
+obj/
+TestResults/
+BenchmarkDotNet.Artifacts/
+artifacts/
+coverage/
+*.nupkg
+*.snupkg
+
+# User-specific
+*.user
+*.rsuser
+*.suo
+
+# Logs
+*.log
+
+# Tooling
+_ReSharper.*
+*.DotSettings.user
