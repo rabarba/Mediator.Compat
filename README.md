@@ -6,10 +6,10 @@
 [![.NET](https://img.shields.io/badge/.NET-8.0%2B-512BD4?logo=.net)](#target-framework--tooling)
 
 Lightweight, **drop-in replacement** for MediatR’s core API  
-(`IRequest`, `IMediator`, `INotification`, `IRequestHandler<>`, `IPipelineBehavior<>`, `Unit`)  
-with **reflection-based scanning** (no Scrutor), **predictable pipeline order**, and **clear errors**.
+(`IRequest`, `IMediator`, `INotIFICATION`, `IRequestHandler<>`, `IPipelineBehavior<>`, `Unit`)  
+with **native reflection-based scanning** (no Scrutor), **deterministic pipeline order**, and **caching for hot paths**.
 
-> **Status:** active WIP. Public contracts are stable; core mediator and DI scanning are implemented.
+> **Status:** active. Core API stable. **Delegate caching** and **single-closure pipeline caching** implemented.
 
 ---
 
@@ -48,19 +48,23 @@ app.MapGet("/ping", async (int x, IMediator mediator) =>
 
 app.Run();
 
+
+
 // ---- app code ----
 public sealed record Ping(int X) : IRequest<int>;
+
 
 public sealed class PingHandler : IRequestHandler<Ping, int>
 {
     public Task<int> Handle(Ping req, CancellationToken ct) => Task.FromResult(req.X + 1);
 }
 
-public sealed class LoggingBehavior<TReq,TRes> : IPipelineBehavior<TReq,TRes>
-    where TReq : IRequest<TRes>
+
+public sealed class LoggingBehavior<TReq,TRes> : IPipelineBehavior<TReq,TRes> where TReq : IRequest<TRes>
 {
     private readonly ILogger<LoggingBehavior<TReq, TRes>> _log;
     public LoggingBehavior(ILogger<LoggingBehavior<TReq, TRes>> log) => _log = log;
+
 
     public async Task<TRes> Handle(TReq request, RequestHandlerDelegate<TRes> next, CancellationToken ct)
     {
@@ -76,7 +80,7 @@ public sealed class LoggingBehavior<TReq,TRes> : IPipelineBehavior<TReq,TRes>
 
 ## How DI registration works
 
-- `AddMediatorCompat(...)` registers `IMediator` and **scans** your assemblies for:
+- `AddMediatorCompat(...)` registers **IMediator** and **core internals** and **scans** your assemblies for:
   - `IRequestHandler<TReq,TRes>`
   - `INotificationHandler<TNote>`
 - **Behaviors are not auto-registered**. Add them **explicitly** to control order:
@@ -106,40 +110,45 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 
 ---
 
+## Performance (current baseline)
+
+> Release build, .NET 8, macOS (latest local run). Caching is **enabled** (delegate + pipeline).
+
+- **Send (0 behaviors):** ~**66 ns**, **440 B**
+- **Send (+2 behaviors):** ~**86–87 ns**, **656 B**
+- **Publish (0 handlers):** ~**21.5–21.7 ns**, **24 B**
+- **Publish (+2 handlers):** ~**38.3–38.4 ns**, **144 B**
+
+See **[docs/benchmarks.md](docs/benchmarks.md)** for how to run.
+
+---
+
 ## Differences vs MediatR (at a glance)
 
 - ✅ Same **namespace** (`MediatR`) & same **core interfaces** → easy swap.
-- ✅ **Native reflection scanning** with duplicate-registration guard.
+- ✅ No Scrutor; **native reflection scanning** with duplicate-registration guard.
 - ✅ **Deterministic behavior order** (explicit; no accidental closed-type pickup).
-- 🚧 No delegate/pipeline caching yet (roadmap).
+- ✅ **Delegate caching** per `(TReq,TRes)` for `Send`.
+- ✅ **Single-closure pipeline** to minimize per-call allocations.
+- 🚧 `Publish` is sequential-only (parallel mode — backlog/idea).
 
 ---
 
-## Benchmarks
+## Target Framework & Tooling
 
-- 📊 See detailed results and how to run them in **[docs/benchmarks.md](docs/benchmarks.md)**.
-- TL;DR of current baseline (Release):  
-  - `Send` ~**215–222 ns** (no behaviors), +**~20–27 ns/behavior**  
-  - `Publish` ~**22 ns** (0 handlers), +**~8–9 ns/handler**
-
----
-
-## Roadmap
-
-- [ ] **Delegate caching** for `Send<T>` (avoid reflection per call)
-- [ ] **Pipeline caching** per closed `TReq/TRes`
+- .NET **8.0+**
+- Nullable + analyzers recommended.
+- Works great with Rider / VS / VS Code.
 
 ---
 
 ## Links
 
-- NuGet: https://www.nuget.org/packages/Mediator.Compat
-- GitHub: https://github.com/rabarba/MediatorCompat
+- NuGet: https://www.nuget.org/packages/Mediator.Compat  
+- GitHub: https://github.com/rabarba/Mediator.Compat
 
 ---
 
 ## License
 
 MIT © Ugur Kap
-
----
