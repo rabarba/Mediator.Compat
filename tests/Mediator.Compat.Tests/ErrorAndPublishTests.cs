@@ -33,7 +33,12 @@ public class ErrorAndPublishTests
     public async Task Missing_handler_throws_meaningful_exception()
     {
         var sc = new ServiceCollection();
-        sc.AddSingleton<IMediator, MediatR.Mediator>(); // no IRequestHandler<VoidCmd, Unit> registered
+
+        sc.AddMediatorCompat(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(object).Assembly); // "blank" scan
+        });
+
         var sp = sc.BuildServiceProvider();
         var mediator = sp.GetRequiredService<IMediator>();
 
@@ -49,13 +54,19 @@ public class ErrorAndPublishTests
     public async Task Publish_with_no_handlers_is_noop()
     {
         var sc = new ServiceCollection();
-        sc.AddSingleton<IMediator, MediatR.Mediator>();
+
+        sc.AddMediatorCompat(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(object).Assembly); // no handlers
+        });
+
         var sp = sc.BuildServiceProvider();
         var mediator = sp.GetRequiredService<IMediator>();
 
         // Should not throw
         await mediator.Publish(new Note("hello"));
     }
+
     private static readonly string[] Expected = ["H1:n"];
     private static readonly string[] ExpectedArray = ["H2:n"];
 
@@ -66,7 +77,12 @@ public class ErrorAndPublishTests
         NoteHandler2.Calls.Clear();
 
         var sc = new ServiceCollection();
-        sc.AddSingleton<IMediator, MediatR.Mediator>();
+
+        sc.AddMediatorCompat(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(object).Assembly);
+        });
+
         sc.AddTransient<INotificationHandler<Note>, NoteHandler1>();
         sc.AddTransient<INotificationHandler<Note>, NoteHandler2>();
 
@@ -75,7 +91,7 @@ public class ErrorAndPublishTests
 
         await mediator.Publish(new Note("n"));
 
-        Assert.Equal(Expected, NoteHandler1.Calls);
+        Assert.Equal(Expected,      NoteHandler1.Calls);
         Assert.Equal(ExpectedArray, NoteHandler2.Calls);
     }
 }

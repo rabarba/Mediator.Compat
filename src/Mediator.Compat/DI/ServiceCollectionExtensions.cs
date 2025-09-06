@@ -2,6 +2,8 @@
 
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using MediatR.Internals;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MediatR
 {
@@ -38,6 +40,12 @@ namespace MediatR
     /// </summary>
     public static class ServiceCollectionExtensions
     {
+        private static void RegisterCore(IServiceCollection services)
+        {
+            services.TryAddSingleton<RequestExecutorCache>();
+            services.TryAddTransient<IMediator, Mediator>();
+        }
+
         /// <summary>
         /// Minimal overload: register IMediator and scan the given assemblies (handlers  &amp; notifications).
         /// Behaviors are not auto-registered; add them explicitly via <see cref="AddOpenBehavior"/>.
@@ -46,8 +54,7 @@ namespace MediatR
         {
             ArgumentNullException.ThrowIfNull(services);
 
-            // Core mediator
-            services.AddSingleton<IMediator, Mediator>();
+            RegisterCore(services);
 
             // Fallback to the calling assembly if none provided
             var toScan = assemblies is { Length: > 0 }
@@ -69,7 +76,7 @@ namespace MediatR
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(configure);
 
-            services.AddSingleton<IMediator, Mediator>();
+            RegisterCore(services);
 
             var opts = new MediatorCompatOptions();
             configure(opts);

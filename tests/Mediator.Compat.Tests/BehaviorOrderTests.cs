@@ -51,15 +51,19 @@ public class BehaviorOrderTests
     public async Task Behaviors_execute_in_registration_order_outer_to_inner()
     {
         var sc = new ServiceCollection();
-        sc.AddSingleton<IMediator, MediatR.Mediator>();
+
         sc.AddSingleton<OrderTracker>();
-        sc.AddTransient(typeof(IPipelineBehavior<,>), typeof(B1<,>)); // outer
-        sc.AddTransient(typeof(IPipelineBehavior<,>), typeof(B2<,>)); // inner
-        sc.AddTransient<IRequestHandler<Ping, int>, PingHandler>();   // from SendSmokeTests
+
+        sc.AddMediatorCompat(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(BehaviorOrderTests).Assembly); // Ping/PingHandler burada
+            cfg.AddOpenBehavior(typeof(B1<,>)); // outer
+            cfg.AddOpenBehavior(typeof(B2<,>)); // inner
+        });
 
         var sp = sc.BuildServiceProvider();
         var mediator = sp.GetRequiredService<IMediator>();
-        var tracker = sp.GetRequiredService<OrderTracker>();
+        var tracker  = sp.GetRequiredService<OrderTracker>();
 
         var result = await mediator.Send(new Ping(41));
         Assert.Equal(42, result);
@@ -71,17 +75,17 @@ public class BehaviorOrderTests
     public async Task Behavior_can_short_circuit_and_skip_handler()
     {
         var sc = new ServiceCollection();
-        sc.AddSingleton<IMediator, MediatR.Mediator>();
+
         sc.AddSingleton<OrderTracker>();
-        sc.AddTransient<IPipelineBehavior<Ping, int>, ShortCircuitPing>(); // short-circuit
-        sc.AddTransient<IRequestHandler<Ping, int>, PingHandler>();       // would be skipped
+        sc.AddMediatorCompat(typeof(BehaviorOrderTests).Assembly);
+        sc.AddTransient<IPipelineBehavior<Ping, int>, ShortCircuitPing>();
 
         var sp = sc.BuildServiceProvider();
         var mediator = sp.GetRequiredService<IMediator>();
-        var tracker = sp.GetRequiredService<OrderTracker>();
+        var tracker  = sp.GetRequiredService<OrderTracker>();
 
         var result = await mediator.Send(new Ping(0));
-        Assert.Equal(999, result);                         // came from behavior, not handler
+        Assert.Equal(999, result);
         Assert.Equal(["SHORT:before"], tracker.Steps);
     }
 }
