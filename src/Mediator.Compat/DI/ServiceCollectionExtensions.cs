@@ -39,7 +39,7 @@ namespace MediatR
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Minimal overload: register IMediator and scan the given assemblies (handlers & notifications).
+        /// Minimal overload: register IMediator and scan the given assemblies (handlers  &amp; notifications).
         /// Behaviors are not auto-registered; add them explicitly via <see cref="AddOpenBehavior"/>.
         /// </summary>
         public static IServiceCollection AddMediatorCompat(this IServiceCollection services, params Assembly[] assemblies)

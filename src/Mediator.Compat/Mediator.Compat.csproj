@@ -8,15 +8,15 @@
 
       <!-- NuGet metadata -->
         <PackageId>Mediator.Compat</PackageId>
-        <Version>0.1.0-alpha.2</Version>
+        <Version>0.1.0-alpha.3</Version>
         <Authors>Ugur Kap</Authors>
         <Description>Lightweight, drop-in replacement for MediatR core API with reflection-based scanning and predictable pipeline order.</Description>
         <PackageTags>mediator;mediatr;pipeline;di;dotnet</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-        <RepositoryUrl>https://github.com/rabarba/MediatorCompat</RepositoryUrl>
+        <RepositoryUrl>https://github.com/rabarba/Mediator.Compat</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/rabarba/MediatorCompat</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/rabarba/Mediator.Compat</PackageProjectUrl>
 
       <!-- README & Icon -->
       <PackageReadmeFile>README.md</PackageReadmeFile>
