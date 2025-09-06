@@ -14,9 +14,9 @@
       <PackageTags>mediator;mediatr;pipeline;di;dotnet</PackageTags>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-      <RepositoryUrl>https://github.com/ugurkap/MediatorCompat</RepositoryUrl>
+      <RepositoryUrl>https://github.com/rabarba/MediatorCompat</RepositoryUrl>
       <RepositoryType>git</RepositoryType>
-      <PackageProjectUrl>https://github.com/ugurkap/MediatorCompat</PackageProjectUrl>
+      <PackageProjectUrl>https://github.com/rabarba/MediatorCompat</PackageProjectUrl>
 
       <!-- README & Icon -->
       <PackageReadmeFile>README.md</PackageReadmeFile>
