@@ -19,6 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatorCompat.Benchmarks", "benchmarks\MediatorCompat.Benchmarks\MediatorCompat.Benchmarks.csproj", "{F3A31BFA-BD77-4023-B9C3-158B7EEDF280}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C9AB9666-E8F1-4DED-AC0C-04F55EA1C24C}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Downloads\benchmarks.md = ..\..\Downloads\benchmarks.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
