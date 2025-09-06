@@ -6,7 +6,9 @@
 [![.NET](https://img.shields.io/badge/.NET-8.0%2B-512BD4?logo=.net)](#target-framework--tooling)
 
 Lightweight, **drop-in replacement** for MediatR’s core API  
+
 (`IRequest`, `IMediator`, `INotIFICATION`, `IRequestHandler<>`, `IPipelineBehavior<>`, `Unit`)  
+
 with **native reflection-based scanning** (no Scrutor), **deterministic pipeline order**, and **caching for hot paths**.
 
 > **Status:** active. Core API stable. **Delegate caching** and **single-closure pipeline caching** implemented.
