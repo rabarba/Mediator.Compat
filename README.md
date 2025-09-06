@@ -1,4 +1,3 @@
-cat > README.md << 'EOF'
 # Mediator.Compat
 
 Lightweight, **drop-in replacement** for MediatR’s core API (no external scanning dependency).
