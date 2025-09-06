@@ -104,10 +104,18 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 ## Differences vs MediatR (at a glance)
 
 - ✅ Same **namespace** (`MediatR`) & same **core interfaces** → easy swap.
-- ✅ No Scrutor; **native reflection scanning** with duplicate-registration guard.
+- ✅ **Native reflection scanning** with duplicate-registration guard.
 - ✅ **Deterministic behavior order** (explicit; no accidental closed-type pickup).
-- 🚧 No parallel `Publish` option yet (roadmap).
 - 🚧 No delegate/pipeline caching yet (roadmap).
+
+---
+
+## Benchmarks
+
+- 📊 See detailed results and how to run them in **[docs/benchmarks.md](docs/benchmarks.md)**.
+- TL;DR of current baseline (Release):  
+  - `Send` ~**215–222 ns** (no behaviors), +**~20–27 ns/behavior**  
+  - `Publish` ~**22 ns** (0 handlers), +**~8–9 ns/handler**
 
 ---
 
@@ -123,23 +131,6 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 
 - [ ] **Delegate caching** for `Send<T>` (avoid reflection per call)
 - [ ] **Pipeline caching** per closed `TReq/TRes`
-- [ ] Optional **parallel publish** mode
-- [ ] SourceLink + symbol packages polish
-- [ ] Additional samples (Minimal API, MVC, Console)
-- [ ] Benchmarks doc & regression guard
-
----
-
-## Benchmarks (local)
-
-> Optional for now.
-
-```bash
-# once a benchmarks project is added
-dotnet run -c Release -p benchmarks/MediatorCompat.Benchmarks
-```
-
-Capture results and add a short table to `docs/benchmarks.md`.
 
 ---
 
