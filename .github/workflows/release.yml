@@ -1,0 +1,84 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch: {}
+
+jobs:
+    build_test_pack:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: |
+                      8.0.x
+
+            - name: Cache NuGet
+              uses: actions/cache@v4
+              with:
+                  path: ~/.nuget/packages
+                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+                  restore-keys: |
+                      ${{ runner.os }}-nuget-
+
+            - name: Restore
+              run: dotnet restore
+
+            - name: Build
+              run: dotnet build -c Release --no-restore
+
+            - name: Test
+              run: dotnet test -c Release --no-build --verbosity normal
+
+            - name: Pack
+              run: dotnet pack src/Mediator.Compat/Mediator.Compat.csproj -c Release -o ./artifacts --no-build
+
+            - name: Upload nupkg artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: packages
+                  path: |
+                      artifacts/*.nupkg
+                      artifacts/*.snupkg
+
+    publish_nuget:
+        needs: build_test_pack
+        if: startsWith(github.ref, 'refs/tags/v')
+        runs-on: ubuntu-latest
+        steps:
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: packages
+                  path: artifacts
+
+            - name: Setup .NET (push)
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+
+            - name: Push packages to NuGet
+              env:
+                  NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+              run: |
+                  shopt -s nullglob
+                  for pkg in artifacts/*.nupkg; do
+                    echo "Pushing $pkg"
+                    dotnet nuget push "$pkg" \
+                      --api-key "$NUGET_API_KEY" \
+                      --source https://api.nuget.org/v3/index.json \
+                      --skip-duplicate
+                  done
+                  for spkg in artifacts/*.snupkg; do
+                    echo "Pushing symbols $spkg"
+                    dotnet nuget push "$spkg" \
+                      --api-key "$NUGET_API_KEY" \
+                      --source https://api.nuget.org/v3/index.json \
+                      --skip-duplicate
+                  done
