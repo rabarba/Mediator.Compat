@@ -65,8 +65,8 @@ public sealed class PingHandler : IRequestHandler<Ping, int>
 public sealed class LoggingBehavior<TReq,TRes> : IPipelineBehavior<TReq,TRes> where TReq : IRequest<TRes>
 {
     private readonly ILogger<LoggingBehavior<TReq, TRes>> _log;
-    public LoggingBehavior(ILogger<LoggingBehavior<TReq, TRes>> log) => _log = log;
 
+    public LoggingBehavior(ILogger<LoggingBehavior<TReq, TRes>> log) => _log = log;
 
     public async Task<TRes> Handle(TReq request, RequestHandlerDelegate<TRes> next, CancellationToken ct)
     {
