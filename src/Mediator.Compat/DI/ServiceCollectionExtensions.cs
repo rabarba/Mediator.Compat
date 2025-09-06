@@ -6,16 +6,43 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MediatR
 {
     /// <summary>
+    /// Options for configuring Mediator.Compat registration without external scanning libs.
+    /// </summary>
+    public sealed class MediatorCompatOptions
+    {
+        internal readonly List<Assembly> Assemblies = [];
+        internal readonly List<Type> OpenBehaviors = [];
+
+        /// <summary>Add an assembly to scan for IRequestHandler&lt;,&gt; and INotificationHandler&lt;&gt;.</summary>
+        public MediatorCompatOptions RegisterServicesFromAssembly(Assembly assembly)
+        {
+            ArgumentNullException.ThrowIfNull(assembly);
+            Assemblies.Add(assembly);
+            return this;
+        }
+
+        /// <summary>Add an open-generic pipeline behavior (e.g., typeof(ValidationBehavior&lt;,&gt;)).</summary>
+        public MediatorCompatOptions AddOpenBehavior(Type openBehavior)
+        {
+            ArgumentNullException.ThrowIfNull(openBehavior);
+            if (!openBehavior.IsGenericTypeDefinition)
+                throw new ArgumentException("Provide an open generic type (e.g., typeof(Behavior<,>)).", nameof(openBehavior));
+
+            OpenBehaviors.Add(openBehavior);
+            return this;
+        }
+    }
+
+    /// <summary>
     /// Dependency Injection helpers for Mediator.Compat.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Registers IMediator and scans the given assemblies for IRequestHandler and INotificationHandler.
-        /// Behaviors are NOT auto-registered; add them explicitly via AddOpenBehavior(typeof(Behavior)).
-        /// Behavior execution order follows registration order (first = outermost).
+        /// Minimal overload: register IMediator and scan the given assemblies (handlers & notifications).
+        /// Behaviors are not auto-registered; add them explicitly via <see cref="AddOpenBehavior"/>.
         /// </summary>
-        public static IServiceCollection AddMediatorCompat(this IServiceCollection services, params Assembly[]? assemblies)
+        public static IServiceCollection AddMediatorCompat(this IServiceCollection services, params Assembly[] assemblies)
         {
             ArgumentNullException.ThrowIfNull(services);
 
@@ -28,9 +55,31 @@ namespace MediatR
                 : [Assembly.GetCallingAssembly()];
 
             foreach (var asm in toScan)
-            {
                 RegisterFromAssembly(services, asm);
-            }
+
+            return services;
+        }
+
+        /// <summary>
+        /// Full control overload (MediatR-like): configure assemblies to scan and open-generic behaviors in order.
+        /// Registration order == behavior execution order (first = outermost).
+        /// </summary>
+        public static IServiceCollection AddMediatorCompat(this IServiceCollection services, Action<MediatorCompatOptions> configure)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(configure);
+
+            services.AddSingleton<IMediator, Mediator>();
+
+            var opts = new MediatorCompatOptions();
+            configure(opts);
+
+            var toScan = opts.Assemblies.Count > 0 ? opts.Assemblies.ToArray() : [Assembly.GetCallingAssembly()];
+            foreach (var asm in toScan)
+                RegisterFromAssembly(services, asm);
+
+            foreach (var open in opts.OpenBehaviors)
+                services.AddTransient(typeof(IPipelineBehavior<,>), open);
 
             return services;
         }
