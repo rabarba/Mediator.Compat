@@ -11,8 +11,8 @@ namespace MediatR
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Registers IMediator and scans the given assemblies for IRequestHandler<,> and INotificationHandler<>.
-        /// Behaviors are NOT auto-registered; add them explicitly via AddOpenBehavior(typeof(Behavior<,>)).
+        /// Registers IMediator and scans the given assemblies for IRequestHandler and INotificationHandler.
+        /// Behaviors are NOT auto-registered; add them explicitly via AddOpenBehavior(typeof(Behavior)).
         /// Behavior execution order follows registration order (first = outermost).
         /// </summary>
         public static IServiceCollection AddMediatorCompat(this IServiceCollection services, params Assembly[]? assemblies)
@@ -65,7 +65,7 @@ namespace MediatR
                     var isReq  = def == typeof(IRequestHandler<,>);
                     var isNote = def == typeof(INotificationHandler<>);
                     // Intentionally DO NOT auto-register closed IPipelineBehavior<,> implementations.
-                    // Behaviors should be added explicitly to cÏontrol order, e.g. services.AddOpenBehavior(typeof(B1<,>));
+                    // Behaviors should be added explicitly to control order, e.g. services.AddOpenBehavior(typeof(B1<,>));
                     if (!(isReq || isNote)) continue;
 
                     // De-duplicate: avoid adding same (ServiceType, ImplementationType) twice

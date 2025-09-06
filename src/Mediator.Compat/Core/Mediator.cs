@@ -2,6 +2,8 @@
 
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.ExceptionServices;
+
 
 namespace MediatR
 {
@@ -10,19 +12,14 @@ namespace MediatR
     /// composes the pipeline (outer → inner) and invokes the handler.
     /// Notifications are published sequentially.
     /// </summary>
-    internal sealed class Mediator : IMediator
+    internal sealed class Mediator(IServiceProvider provider) : IMediator
     {
-        private readonly IServiceProvider _provider;
-
-        public Mediator(IServiceProvider provider)
-        {
-            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
-        }
+        private readonly IServiceProvider _provider = provider ?? throw new ArgumentNullException(nameof(provider));
 
         /// <inheritdoc />
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
-            if (request is null) throw new ArgumentNullException(nameof(request));
+            ArgumentNullException.ThrowIfNull(request);
 
             // Close the generic SendCore<TRequest, TResponse> using the runtime request type.
             var requestType = request.GetType();
@@ -30,7 +27,16 @@ namespace MediatR
                 .GetMethod(nameof(SendCore), BindingFlags.Instance | BindingFlags.NonPublic)!
                 .MakeGenericMethod(requestType, typeof(TResponse));
 
-            return (Task<TResponse>)method.Invoke(this, new object[] { request, cancellationToken })!;
+            try
+            {
+                return (Task<TResponse>)method.Invoke(this, [request, cancellationToken])!;
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException is not null)
+            {
+                // Unwrap inner exception to preserve original type (e.g., InvalidOperationException) and stack trace
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                throw; // unreachable, required by compiler
+            }
         }
 
         /// <summary>
@@ -43,7 +49,8 @@ namespace MediatR
             var handler = _provider.GetService<IRequestHandler<TRequest, TResponse>>();
             if (handler is null)
                 throw new InvalidOperationException(
-                    $"No IRequestHandler<{typeof(TRequest).Name}, {typeof(TResponse).Name}> is registered.");
+                    $"No IRequestHandler<{typeof(TRequest).FullName}, {typeof(TResponse).FullName}> is registered. " +
+                    "Make sure the handler is registered with the DI container (AddMediatorCompat or manual registration).");
 
             // Resolve behaviors in registration order (outer → inner)
             var behaviors = _provider.GetServices<IPipelineBehavior<TRequest, TResponse>>().ToList();
@@ -52,7 +59,7 @@ namespace MediatR
             RequestHandlerDelegate<TResponse> terminal = () => handler.Handle(request, cancellationToken);
 
             // Compose behaviors from inner to outer
-            for (int i = behaviors.Count - 1; i >= 0; i--)
+            for (var i = behaviors.Count - 1; i >= 0; i--)
             {
                 var next = terminal;
                 var behavior = behaviors[i];
