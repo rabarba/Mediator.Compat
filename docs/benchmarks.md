@@ -10,10 +10,6 @@ This page captures a first pass of microbenchmarks for `Send` and `Publish` with
 
 ```bash
 dotnet run -c Release -p benchmarks/MediatorCompat.Benchmarks
-# or a single method:
-dotnet run -c Release -p benchmarks/MediatorCompat.Benchmarks -- --filter *Send_Ping*
-# faster job:
-dotnet run -c Release -p benchmarks/MediatorCompat.Benchmarks -- --job Short --filter *Send_Ping*
 ```
 
 BenchmarkDotNet will emit markdown reports under:
@@ -62,7 +58,6 @@ These numbers are healthy for an MVP that:
 
 - **Delegate caching:** pre-close and cache an executor per `(TRequest,TResponse)` to avoid reflection per call.
 - **Pipeline caching:** pre-compose behavior chains per `(TRequest,TResponse)`; at call time just resolve instances and invoke.
-- **Optional parallel publish:** keep sequential as default; measure impact separately.
 
 When these land, re-run and add a second table for A/B comparison.
 
