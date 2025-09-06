@@ -1,5 +1,10 @@
 # Mediator.Compat
 
+[![NuGet (pre)](https://img.shields.io/nuget/vpre/Mediator.Compat.svg?logo=nuget)](https://www.nuget.org/packages/Mediator.Compat)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Mediator.Compat.svg?logo=nuget)](https://www.nuget.org/packages/Mediator.Compat)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0%2B-512BD4?logo=.net)](#target-framework--tooling)
+
 Lightweight, **drop-in replacement** for MediatR’s core API  
 (`IRequest`, `IMediator`, `INotification`, `IRequestHandler<>`, `IPipelineBehavior<>`, `Unit`)  
 with **reflection-based scanning** (no Scrutor), **predictable pipeline order**, and **clear errors**.
@@ -126,6 +131,15 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 
 ---
 
+## Links
+
+- NuGet: https://www.nuget.org/packages/Mediator.Compat
+- GitHub: https://github.com/rabarba/MediatorCompat
+
+---
+
 ## License
 
 MIT © Ugur Kap
+
+---
