@@ -52,4 +52,23 @@ public class RegistrationSmokeTests
 
         Assert.Equal(["B1:before", "B2:before", "B2:after", "B1:after"], tracker.Steps);
     }
+
+    [Fact]
+    public async Task Scanning_auto_registers_notification_handlers()
+    {
+        NoteHandler1.Calls.Clear();
+        NoteHandler2.Calls.Clear();
+
+        var sc = new ServiceCollection();
+        // Handlers live in this test assembly; no manual AddTransient for them.
+        sc.AddMediatorCompat(typeof(ErrorAndPublishTests).Assembly);
+
+        var sp = sc.BuildServiceProvider();
+        var m  = sp.GetRequiredService<IMediator>();
+
+        await m.Publish(new Note("n"));
+
+        Assert.Equal(new[] { "H1:n" }, NoteHandler1.Calls);
+        Assert.Equal(new[] { "H2:n" }, NoteHandler2.Calls);
+    }
 }

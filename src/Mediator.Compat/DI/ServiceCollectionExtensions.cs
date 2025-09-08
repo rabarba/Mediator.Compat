@@ -43,7 +43,7 @@ namespace Mediator.Compat
         private static void RegisterCore(IServiceCollection services)
         {
             services.TryAddSingleton<RequestExecutorCache>();
-            services.TryAddTransient<IMediator, Mediator>();
+            services.TryAddScoped<IMediator, Mediator>();
         }
 
         /// <summary>
