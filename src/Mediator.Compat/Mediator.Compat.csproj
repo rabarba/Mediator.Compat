@@ -8,7 +8,7 @@
 
       <!-- NuGet metadata -->
         <PackageId>Mediator.Compat</PackageId>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <Authors>Ugur Kap</Authors>
         <Description>Lightweight, drop-in replacement for MediatR core API with reflection-based scanning and predictable pipeline order.</Description>
         <PackageTags>mediator;mediatr;pipeline;di;dotnet</PackageTags>
