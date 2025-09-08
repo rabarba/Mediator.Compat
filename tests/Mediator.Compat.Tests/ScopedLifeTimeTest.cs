@@ -9,9 +9,14 @@ public sealed class ScopedTracker : IDisposable
 }
 
 public sealed record UsesScoped() : IRequest<Unit>;
+
 public sealed class UsesScopedHandler(ScopedTracker tracker) : IRequestHandler<UsesScoped, Unit>
 {
-    public Task<Unit> Handle(UsesScoped request, CancellationToken ct) => Task.FromResult(Unit.Value);
+    public Task<Unit> Handle(UsesScoped request, CancellationToken ct)
+    {
+        GC.KeepAlive(tracker);
+        return Task.FromResult(Unit.Value);
+    }
 }
 
 public class ScopedLifetimeTests
