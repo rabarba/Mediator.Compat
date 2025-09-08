@@ -20,11 +20,6 @@ with **native reflection-based scanning**, **deterministic pipeline order**, and
 ```bash
 dotnet add package Mediator.Compat
 ```
-
-From source:
-1) Add a project reference to `src/Mediator.Compat/Mediator.Compat.csproj`.  
-2) Keep `using MediatR;` in your code (same namespace as MediatR).
-
 ---
 
 ## Quick Start
