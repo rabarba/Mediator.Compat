@@ -25,7 +25,7 @@ dotnet add package Mediator.Compat
 ## Quick Start
 
 ```csharp
-using MediatR;
+using Mediator.Compat;
 
 var builder = WebApplication.CreateBuilder(args);
 
