@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Represents a one-way notification (event) that does not produce a response.

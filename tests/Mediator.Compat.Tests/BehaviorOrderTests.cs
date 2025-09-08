@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mediator.Compat.Tests;

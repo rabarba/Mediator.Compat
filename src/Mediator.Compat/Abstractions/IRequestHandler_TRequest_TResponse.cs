@@ -3,7 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Handles a request of type <typeparamref name="TRequest"/> and produces a response of type <typeparamref name="TResponse"/>.

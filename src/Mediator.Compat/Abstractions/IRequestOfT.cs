@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Represents a request that is handled by a single handler and returns a response of type <typeparamref name="TResponse"/>.

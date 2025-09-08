@@ -1,11 +1,11 @@
 #nullable enable
 
 using System.Reflection;
+using Mediator.Compat.Internals;
 using Microsoft.Extensions.DependencyInjection;
-using MediatR.Internals;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Options for configuring Mediator.Compat registration without external scanning libs.
