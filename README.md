@@ -11,8 +11,6 @@ Lightweight, **drop-in replacement** for MediatR’s core API
 
 with **native reflection-based scanning**, **deterministic pipeline order**, and **caching for hot paths**.
 
-> **Status:** beta. Core API stable. **Delegate caching** and **single-closure pipeline caching** implemented.
-
 ---
 
 ## Install
