@@ -132,6 +132,7 @@ See **[docs/benchmarks.md](docs/benchmarks.md)** for how to run.
 - ✅ **Deterministic behavior order** (explicit; no accidental closed-type pickup).
 - ✅ **Delegate caching** per `(TReq,TRes)` for `Send`.
 - ✅ **Single-closure pipeline** to minimize per-call allocations.
+- ✅ Auto-registration for open generic INotificationHandler<> and IRequestHandler<,>
 - 🚧 `Publish` is sequential-only (parallel mode — backlog/idea).
 
 ---
