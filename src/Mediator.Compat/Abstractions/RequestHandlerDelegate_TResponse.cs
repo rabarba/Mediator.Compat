@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Continuation delegate for the remaining pipeline and ultimately the request handler.

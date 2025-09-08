@@ -1,5 +1,4 @@
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+using Mediator.Compat;
 
 var builder = WebApplication.CreateBuilder(args);
 

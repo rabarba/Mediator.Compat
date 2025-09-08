@@ -3,7 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Coordinates the sending of requests and publishing of notifications.

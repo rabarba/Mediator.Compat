@@ -1,7 +1,4 @@
-namespace MediatR.Internals;
-
-using System.Threading;
-using System.Threading.Tasks;
+namespace Mediator.Compat.Internals;
 
 internal static class BehaviorChain
 {

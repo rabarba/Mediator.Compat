@@ -3,7 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Handles a notification of type <typeparamref name="TNotification"/>.

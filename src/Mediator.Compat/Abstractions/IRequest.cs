@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Represents a request that does not return a meaningful value.

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Represents a void-like value for requests that do not return a meaningful result.

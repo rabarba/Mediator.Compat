@@ -3,7 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Defines a cross-cutting behavior that runs around the handling of a request.

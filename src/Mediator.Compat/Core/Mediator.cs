@@ -1,10 +1,10 @@
 #nullable enable
 
+using Mediator.Compat.Internals;
 using Microsoft.Extensions.DependencyInjection;
-using MediatR.Internals;
 
 
-namespace MediatR
+namespace Mediator.Compat
 {
     /// <summary>
     /// Minimal mediator implementation. Resolves handlers/behaviors from the IServiceProvider,

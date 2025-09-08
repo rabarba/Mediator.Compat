@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MediatR.Internals;
+namespace Mediator.Compat.Internals;
 internal sealed class RequestExecutorCache
 {
     private readonly ConcurrentDictionary<TypeKey, BoxedExecutor> _map = new();

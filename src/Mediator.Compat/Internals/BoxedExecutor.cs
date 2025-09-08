@@ -1,7 +1,3 @@
-namespace MediatR.Internals;
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+namespace Mediator.Compat.Internals;
 
 internal delegate Task<object?> BoxedExecutor(IServiceProvider sp, object request, CancellationToken ct);
