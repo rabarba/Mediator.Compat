@@ -5,6 +5,32 @@ namespace Mediator.Compat.Tests;
 // ---- Fixtures ----
 public sealed record VoidCmd() : IRequest<Unit>;
 public sealed record Note(string Message) : INotification;
+public sealed record BoomNote(string Message) : INotification;
+public sealed class BoomNoteHandler : INotificationHandler<BoomNote>
+{
+    public Task Handle(BoomNote n, CancellationToken ct)
+        => throw new InvalidOperationException("note-boom");
+}
+public sealed record CancelCmd() : IRequest<Unit>;
+public sealed class CancelHandler : IRequestHandler<CancelCmd, Unit>
+{
+    public Task<Unit> Handle(CancelCmd request, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        return Task.FromResult(Unit.Value);
+    }
+}
+public sealed record CancelNote(string Message) : INotification;
+public sealed class CancelNoteHandler : INotificationHandler<CancelNote>
+{
+    public Task Handle(CancelNote n, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        return Task.CompletedTask;
+    }
+}
+
+
 
 public sealed class NoteHandler1 : INotificationHandler<Note>
 {
@@ -92,5 +118,45 @@ public class ErrorAndPublishTests
 
         Assert.Equal(Expected,      NoteHandler1.Calls);
         Assert.Equal(ExpectedArray, NoteHandler2.Calls);
+    }
+
+    [Fact]
+    public async Task Publish_with_handler_exception_bubbles()
+    {
+        var sc = new ServiceCollection();
+        sc.AddMediatorCompat(cfg => cfg.RegisterServicesFromAssembly(typeof(ErrorAndPublishTests).Assembly));
+        sc.AddTransient<INotificationHandler<BoomNote>, BoomNoteHandler>();
+        var sp = sc.BuildServiceProvider();
+        var m  = sp.GetRequiredService<IMediator>();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => m.Publish(new BoomNote("x")));
+    }
+
+    [Fact]
+    public async Task Send_respects_cancellation()
+    {
+        var sc = new ServiceCollection();
+        sc.AddMediatorCompat(cfg => cfg.RegisterServicesFromAssembly(typeof(ErrorAndPublishTests).Assembly));
+        sc.AddTransient<IRequestHandler<CancelCmd, Unit>, CancelHandler>();
+        var sp = sc.BuildServiceProvider();
+        var m  = sp.GetRequiredService<IMediator>();
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        await Assert.ThrowsAsync<OperationCanceledException>(() => m.Send(new CancelCmd(), cts.Token));
+    }
+
+    [Fact]
+    public async Task Publish_respects_cancellation()
+    {
+        var sc = new ServiceCollection();
+        sc.AddMediatorCompat(cfg => cfg.RegisterServicesFromAssembly(typeof(ErrorAndPublishTests).Assembly));
+        sc.AddTransient<INotificationHandler<CancelNote>, CancelNoteHandler>();
+        var sp = sc.BuildServiceProvider();
+        var m  = sp.GetRequiredService<IMediator>();
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        await Assert.ThrowsAsync<OperationCanceledException>(() => m.Publish(new CancelNote("x"), cts.Token));
     }
 }
