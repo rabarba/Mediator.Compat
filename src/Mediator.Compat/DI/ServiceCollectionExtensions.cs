@@ -108,35 +108,60 @@ namespace MediatR
 
         private static void RegisterFromAssembly(IServiceCollection services, Assembly assembly)
         {
-            foreach (var type in assembly.DefinedTypes)
+            var types = assembly.DefinedTypes;
+
+            RegisterClosedHandlers(services, types);
+            RegisterOpenGenericHandlers(services, types);
+        }
+
+        private static void RegisterClosedHandlers(IServiceCollection services, IEnumerable<TypeInfo> types)
+        {
+            foreach (var type in types)
             {
-                if (type.IsAbstract || type.IsInterface) continue;
-                if (type.IsGenericTypeDefinition) continue; // we register open generics explicitly via AddOpenBehavior
+                if (type.IsAbstract || type.IsInterface || type.IsGenericTypeDefinition) continue;
 
                 foreach (var iface in type.ImplementedInterfaces)
                 {
                     if (!iface.IsGenericType) continue;
 
                     var def = iface.GetGenericTypeDefinition();
-                    var isReq  = def == typeof(IRequestHandler<,>);
-                    var isNote = def == typeof(INotificationHandler<>);
-                    // Intentionally DO NOT auto-register closed IPipelineBehavior<,> implementations.
-                    // Behaviors should be added explicitly to control order, e.g. services.AddOpenBehavior(typeof(B1<,>));
-                    if (!(isReq || isNote)) continue;
+                    if (def != typeof(IRequestHandler<,>) && def != typeof(INotificationHandler<>)) continue;
 
-                    // De-duplicate: avoid adding same (ServiceType, ImplementationType) twice
-                    var serviceType = iface;
-                    var implType = type.AsType();
-                    var already = services.Any(d =>
-                        d.ServiceType == serviceType &&
-                        d.ImplementationType == implType &&
-                        d.Lifetime == ServiceLifetime.Transient);
-
-                    if (!already)
-                    {
-                        services.AddTransient(serviceType, implType);
-                    }
+                    TryAddTransientOnce(services, iface, type.AsType());
                 }
+            }
+        }
+
+        private static void RegisterOpenGenericHandlers(IServiceCollection services, IEnumerable<TypeInfo> types)
+        {
+            foreach (var type in types)
+            {
+                if (!type.IsClass || type.IsAbstract || !type.IsGenericTypeDefinition) continue;
+
+                foreach (var iface in type.ImplementedInterfaces)
+                {
+                    if (!iface.IsGenericType) continue;
+
+                    var def = iface.GetGenericTypeDefinition();
+                    Type? openService =
+                        def == typeof(INotificationHandler<>) ? typeof(INotificationHandler<>) :
+                        def == typeof(IRequestHandler<,>)     ? typeof(IRequestHandler<,>)     : null;
+
+                    if (openService is null) continue;
+
+                    TryAddTransientOnce(services, openService, type.AsType());
+                }
+            }
+        }
+
+        private static void TryAddTransientOnce(IServiceCollection services, Type service, Type impl)
+        {
+            if (!services.Any(d =>
+                    d.Lifetime == ServiceLifetime.Transient &&
+                    d.ServiceType == service &&
+                    d.ImplementationType == impl))
+            {
+                services.AddTransient(service, impl);
             }
         }
     }
