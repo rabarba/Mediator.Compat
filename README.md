@@ -154,7 +154,7 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 - Cache handler factories (`Func<IServiceProvider, THandler>`) to shave a few more nanoseconds off baseline.  
 - Continue allocation dieting in baseline to approach **≤336 B**.
 
-See **[https://github.com/rabarba/Mediator.Compat/blob/main/docs/benchmarks.md](docs/benchmarks.md)** for how to run.
+See **[/docs/benchmarks.md](https://github.com/rabarba/Mediator.Compat/blob/main/docs/benchmarks.md)** for how to run.
 
 ---
 
