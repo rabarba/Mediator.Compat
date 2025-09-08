@@ -98,23 +98,61 @@ Caller → [Behavior #1] → [Behavior #2] → … → [Handler] → Result
 
 ---
 
-## Error semantics
+## Comparative Benchmarks (vs MediatR 12.x)
 
-- Missing request handler:
-  - Throws `InvalidOperationException` with concrete generic types in the message.
-- `Publish` is **sequential** and **no-op** if there are no handlers.
-- Exceptions bubble up unchanged (no hidden wrapping).
+> **Environment:** macOS (Apple M4 Pro), .NET 8, BenchmarkDotNet *DefaultJob*.  
+> **Matrix:** `BehaviorCount ∈ {0, 2}`, `NotificationHandlerCount ∈ {0, 2}`.  
+> Full raw output is captured in `docs/benchmarks.md` (CSV/table).
 
----
+### Headline results
 
-## Performance (current baseline)
+- **Send (Ping, 0 behaviors)**  
+  - `Mediator.Compat`: **66.96 ns / 440 B**  
+  - `MediatR`: **61.25 ns / 336 B**  
+  → MediatR is ~**9%** faster; Compat allocates **+104 B** more. (Baseline “no-pipeline” fast path is our next optimization target.)
 
-> Release build, .NET 8, macOS (latest local run). Caching is **enabled** (delegate + pipeline).
+- **Send (Ping, 2 behaviors)**  
+  - `Mediator.Compat`: **~105 ns / 800 B**  
+  - `MediatR`: **~125 ns / 816 B**  
+  → Compat is ~**16–17%** faster; **−16 B** less allocation. (Single-closure pipeline pays off.)
 
-- **Send (0 behaviors):** ~**66 ns**, **440 B**
-- **Send (+2 behaviors):** ~**86–87 ns**, **656 B**
-- **Publish (0 handlers):** ~**21.5–21.7 ns**, **24 B**
-- **Publish (+2 handlers):** ~**38.3–38.4 ns**, **144 B**
+- **Send (Void, 0 behaviors)**  
+  - `Mediator.Compat`: **59.31 ns / 296 B**  
+  - `MediatR`: **59.98 ns / 264 B**  
+  → Essentially a tie on time; Compat is **+32 B**.
+
+- **Send (Void, 2 behaviors)**  
+  - `Mediator.Compat`: **~88–91 ns / 512 B**  
+  - `MediatR`: **~116 ns / 600 B**  
+  → Compat is ~**22–24%** faster; **−88 B** less allocation.
+
+- **Publish (Note, 0 handlers)**  
+  - `Mediator.Compat`: **21.45 ns / 24 B**  
+  - `MediatR`: **35.05 ns / 88 B**  
+  → Compat is ~**39%** faster; **−64 B** allocation.
+
+- **Publish (Note, 2 handlers)**  
+  - `Mediator.Compat`: **~36.9–40.2 ns / 144 B**  
+  - `MediatR`: **~78.2–79.6 ns / 464 B**  
+  → Compat is **~2× faster** with **~3× less** allocation.
+
+> **Run locally**
+>
+> ```bash
+> dotnet run -c Release -p benchmarks/MediatorCompat.Benchmarks
+> ```
+
+### Takeaways
+
+- With **pipeline behaviors enabled (≥1)**, `Mediator.Compat` is consistently **faster** and allocates **less**.  
+- For **Publish**, Compat leads both in time and allocation (sequential publish mode).  
+- In the **baseline “no-behavior”** Send case, MediatR is slightly ahead; we plan a dedicated **no-pipeline fast path** to close the gap.
+
+### Next optimization targets
+
+- Introduce a **no-behavior fast path** (skip pipeline construction entirely).  
+- Cache handler factories (`Func<IServiceProvider, THandler>`) to shave a few more nanoseconds off baseline.  
+- Continue allocation dieting in baseline to approach **≤336 B**.
 
 See **[docs/benchmarks.md](docs/benchmarks.md)** for how to run.
 
