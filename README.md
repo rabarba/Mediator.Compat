@@ -158,8 +158,8 @@ See **[/docs/benchmarks.md](https://github.com/rabarba/Mediator.Compat/blob/main
 
 ## Differences vs MediatR (at a glance)
 
-- ✅ Same **namespace** (`MediatR`) & same **core interfaces** → easy swap.
-- ✅ No Scrutor; **native reflection scanning** with duplicate-registration guard.
+- ✅ same **core interfaces** → easy swap.
+- ✅ **native reflection scanning** with duplicate-registration guard.
 - ✅ **Deterministic behavior order** (explicit; no accidental closed-type pickup).
 - ✅ **Delegate caching** per `(TReq,TRes)` for `Send`.
 - ✅ **Single-closure pipeline** to minimize per-call allocations.
